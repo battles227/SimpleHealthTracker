@@ -1,4 +1,4 @@
-//created by Andrew Battles
+<!--created by Andrew Battles-->
 <!DOCTYPE html>
 <html lang = "en">
   <head>
@@ -36,40 +36,40 @@
     }
 
     updateInitiative = (num) => {
-      console.log('update Init: '+num)
+      //console.log('update Init: '+num)
       this.setState({initiative: num},() => this.updateParent())
     }
 
     updateName = (name) => {
-      console.log("update name: "+name)
+      //console.log("update name: "+name)
       this.setState({name: name},() => this.updateParent())
     }
 
     updateMax = (num) => {
-      console.log('updateHealth: '+num)
+      //console.log('updateHealth: '+num)
       this.setState({maxHP: num},() => this.checkLevel())
     }
 
     updateCurrent = (num) => {
-      console.log('updateCurrent: '+ num)
+      //console.log('updateCurrent: '+ num)
       this.setState({currentHP: num},() => this.checkLevel())
     }
 
     updateChange = (num) => {
-      console.log('updateChange: '+num)
+      //console.log('updateChange: '+num)
       if(typeof(num) == 'number') {
         this.setState({toChange: num})
       }
       else {
           try{
-            console.log(typeof(num))
-            console.log(num)
+            //console.log(typeof(num))
+            //console.log(num)
             let value = eval(num)
-            console.log('value: '+value)
+            //console.log('value: '+value)
             this.setState({toChange: value})
           }
           catch(e){
-            console.log('no change')
+            //console.log('no change')
           }
       }
       //if typeof num == string, eval(num) first
@@ -78,15 +78,15 @@
     }
 
     applyChange = () => {
-      console.log('apply change')
+      //console.log('apply change')
       this.updateCurrent(this.state.currentHP - this.state.toChange)
       let changeField = document.getElementById('changeField')
       changeField.value = this.state.toChange;
     }
 
     checkLevel = () => {
-      console.log('check level: '+this.state.currentHP + '/'+ this.state.maxHP)
-      console.log(this.state)
+      //console.log('check level: '+this.state.currentHP + '/'+ this.state.maxHP)
+      //console.log(this.state)
       if(this.state.currentHP <= 0){
         this.setState({hpLevel: 'red'})
       }
@@ -102,19 +102,19 @@
     }
 
     updateParent = () => {
-      console.log('-sending---')
-      console.log(this.state)
-      console.log('-----')
+      //console.log('-sending---')
+      //console.log(this.state)
+      //console.log('-----')
       this.props.updateParent(this.state)
     }
 
     duplicate = () => {
-      console.log('duplicate button pressed')
+      //console.log('duplicate button pressed')
       this.props.duplicateFunction(this.state)
     }
 
     deleteSelf = () => {
-      console.log('delete button pressed')
+      //console.log('delete button pressed')
       this.props.deleteFunction(this.state.id)
     }
 
@@ -156,11 +156,11 @@
     }
 
     addBar = (duplicate) => {
-      console.log('add health bar');
+      //console.log('add health bar');
       let currentList = this.state.bars;
       let newBar = null;
       if(duplicate) {
-        console.log('duplicating')
+        //console.log('duplicating')
         /*let lastChar = duplicate.name[duplicate.name.length-1];
         let nextName = duplicate.name;
         if(parseInt(lastChar) > -1){
@@ -183,7 +183,7 @@
         }
       }
       else{
-        console.log('new bar')
+        //console.log('new bar')
         newBar = {
           id: 'bar'+this.state.barCounter,
           initiative: 1,
@@ -194,21 +194,21 @@
       }
       currentList.push(newBar);
       this.setState({barCounter: this.state.barCounter+1,
-                      bars: currentList}, () => {console.log(this.state)});
+                      bars: currentList})//, () => {console.log(this.state)});
     }
 
     deleteBar = (id) => {
-      console.log('deleteBar: '+id)
+      //console.log('deleteBar: '+id)
       let bars = this.state.bars;
-      console.log(bars)
+      //console.log(bars)
       const filteredBars = bars.filter(bar => bar.id != id);
-      console.log(filteredBars)
+      //console.log(filteredBars)
       this.setState({bars: []},
         () => this.setState({bars: filteredBars}));
     }
 
     updateStore = (childState) => {
-      console.log('updateStore: '+childState.id)
+      //console.log('updateStore: '+childState.id)
       let bars = this.state.bars;
       for(let i=0;i<bars.length;i++){
         if(bars[i].id == childState.id){
@@ -224,16 +224,16 @@
     }
 
     sortByInitiative = () => {
-      console.log('sortByInitiative')
+      //console.log('sortByInitiative')
       let bars = this.state.bars;
-      console.log(bars)
+      //console.log(bars)
       bars.sort(function(a,b){return (b.initiative - a.initiative)});
       this.setState({bars:[]},
         () => this.setState({bars:bars}));
     }
 
     saveState = () => {
-      console.log("saving "+ this.props.name+"s")
+      //console.log("saving "+ this.props.name+"s")
 
       var text = JSON.stringify(this.state.bars),
           blob = new Blob([text], { type: 'text/plain' }),
@@ -248,14 +248,14 @@
 
 
     loadState = () => {
-      console.log("loading "+ this.props.name+"s")
+      //console.log("loading "+ this.props.name+"s")
 
       var state = prompt("Copy the contents of your state file and paste it here:", '[{"id":"bar0","initiative":6,"name":"Test Monster","maxHP":5,"currentHP":0}]');
 
       if (state != null) {
         try{
           let newState = JSON.parse(state);
-          console.log(newState)
+          //console.log(newState)
           this.setState({bars:[]},
                 () => this.setState({bars: newState}))
         }
