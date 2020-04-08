@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang = "en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+
+    <div id="main"></div>
+
+  </body>
+
+
+  <script type="text/babel">
+
+  class HealthBar extends React.Component {
+    constructor(props){
+      super(props);
+
+      this.state={
+        id: this.props.id,
+        initiative: this.props.initiative,
+        name: this.props.name,
+        maxHP: this.props.maxHP,
+        currentHP: this.props.currentHP,
+        toChange: 0,
+        hpLevel: 'green'
+      }
+    }
+
+    componentDidMount() {
+      this.checkLevel()
+    }
+
+    updateInitiative = (num) => {
+      console.log('update Init: '+num)
+      this.setState({initiative: num},() => this.updateParent())
+    }
+
+    updateName = (name) => {
+      console.log("update name: "+name)
+      this.setState({name: name},() => this.updateParent())
+    }
+
+    updateMax = (num) => {
+      console.log('updateHealth: '+num)
+      this.setState({maxHP: num},() => this.checkLevel())
+    }
+
+    updateCurrent = (num) => {
+      console.log('updateCurrent: '+ num)
+      this.setState({currentHP: num},() => this.checkLevel())
+    }
+
+    updateChange = (num) => {
+      console.log('updateChange: '+num)
+      if(typeof(num) == 'number') {
+        this.setState({toChange: num})
+      }
+      else {
+          try{
+            console.log(typeof(num))
+            console.log(num)
+            let value = eval(num)
+            console.log('value: '+value)
+            this.setState({toChange: value})
+          }
+          catch(e){
+            console.log('no change')
+          }
+      }
+      //if typeof num == string, eval(num) first
+
+
+    }
+
+    applyChange = () => {
+      console.log('apply change')
+      this.updateCurrent(this.state.currentHP - this.state.toChange)
+      let changeField = document.getElementById('changeField')
+      changeField.value = this.state.toChange;
+    }
+
+    checkLevel = () => {
+      console.log('check level: '+this.state.currentHP + '/'+ this.state.maxHP)
+      console.log(this.state)
+      if(this.state.currentHP <= 0){
+        this.setState({hpLevel: 'red'})
+      }
+      else {
+        if(this.state.currentHP <= Math.floor(this.state.maxHP/2)) {
+          this.setState({hpLevel: 'yellow'})
+        }
+        else{
+          this.setState({hpLevel: 'green'})
+        }
+      }
+      this.updateParent();
+    }
+
+    updateParent = () => {
+      console.log('-sending---')
+      console.log(this.state)
+      console.log('-----')
+      this.props.updateParent(this.state)
+    }
+
+    duplicate = () => {
+      console.log('duplicate button pressed')
+      this.props.duplicateFunction(this.state)
+    }
+
+    deleteSelf = () => {
+      console.log('delete button pressed')
+      this.props.deleteFunction(this.state.id)
+    }
+
+
+
+
+    render() {
+      return(
+          <tr className={this.state.hpLevel}>
+            <td><input className="initiativeInput" type='number' min={1} value={this.state.initiative} onChange={e => this.updateInitiative(e.target.value)}/></td>
+            <td><input className="textInput" type="textarea" value={this.state.name} onChange={e => this.updateName(e.target.value)}/></td>
+            <td><input className="numberInput" type='number' value={this.state.maxHP} onChange={e => this.updateMax(parseInt(e.target.value))}/></td>
+            <td><input className="numberInput" type='number' value={this.state.currentHP} onChange={e => this.updateCurrent(parseInt(e.target.value))}/></td>
+            <td><input id='changeField' className="numberInput" type='textarea' defaultValue={0} onChange={e => this.updateChange(e.target.value)}/></td>
+            <td><button className="hitButton" disabled={this.state.toChange ==0} type='button' onClick={e => this.applyChange()}>{this.state.toChange >= 0 ? "HIT 'EM!":"Heal 'em"}</button></td>
+            <td><button type='button' onClick={e => this.duplicate()}>Dup.</button></td>
+            <td><button type='button' onClick={e => this.deleteSelf()}>X</button></td>
+          </tr>
+      )
+    }
+  }
+
+  //class Player extends React.Component { <-- use monsters, just put in a new section
+
+  //}
+
+  class Panel extends React.Component {
+    constructor(props){
+      super(props);
+
+      this.state = {
+        bars: [],
+        barCounter: 0
+
+      }
+    }
+    componentDidMount = () => {
+      this.addBar();
+    }
+
+    addBar = (duplicate) => {
+      console.log('add health bar');
+      let currentList = this.state.bars;
+      let newBar = null;
+      if(duplicate) {
+        console.log('duplicating')
+        /*let lastChar = duplicate.name[duplicate.name.length-1];
+        let nextName = duplicate.name;
+        if(parseInt(lastChar) > -1){
+          let nextNum = parseInt(lastChar)+1;
+          console.log(nextName[nextName.length-1])
+          let splitName = nextName.split(lastChar)
+          console.log(splitName)
+          nextName = splitName[0]+nextNum
+        }
+        else{
+          nextName = nextName + ' 1';
+        }*/
+
+        newBar = {
+          id: 'bar'+this.state.barCounter,
+          initiative: duplicate.initiative,
+          name: duplicate.name,//nextName, //+(this.state.barCounter+1),
+          maxHP: duplicate.maxHP,
+          currentHP: duplicate.currentHP
+        }
+      }
+      else{
+        console.log('new bar')
+        newBar = {
+          id: 'bar'+this.state.barCounter,
+          initiative: 1,
+          name: this.props.name+' '+this.state.barCounter,
+          maxHP: 50,
+          currentHP: 50
+        }
+      }
+      currentList.push(newBar);
+      this.setState({barCounter: this.state.barCounter+1,
+                      bars: currentList}, () => {console.log(this.state)});
+    }
+
+    deleteBar = (id) => {
+      console.log('deleteBar: '+id)
+      let bars = this.state.bars;
+      console.log(bars)
+      const filteredBars = bars.filter(bar => bar.id != id);
+      console.log(filteredBars)
+      this.setState({bars: []},
+        () => this.setState({bars: filteredBars}));
+    }
+
+    updateStore = (childState) => {
+      console.log('updateStore: '+childState.id)
+      let bars = this.state.bars;
+      for(let i=0;i<bars.length;i++){
+        if(bars[i].id == childState.id){
+          bars[i].id = childState.id;
+          bars[i].initiative = childState.initiative;
+          bars[i].name = childState.name;
+          bars[i].maxHP = childState.maxHP;
+          bars[i].currentHP = childState.currentHP;
+          console.log(bars[i])
+        }
+      }
+      this.setState({bars: bars})
+    }
+
+    sortByInitiative = () => {
+      console.log('sortByInitiative')
+      let bars = this.state.bars;
+      console.log(bars)
+      bars.sort(function(a,b){return (b.initiative - a.initiative)});
+      this.setState({bars:[]},
+        () => this.setState({bars:bars}));
+    }
+
+    saveState = () => {
+      console.log("saving "+ this.props.name+"s")
+
+      var text = JSON.stringify(this.state.bars),
+          blob = new Blob([text], { type: 'text/plain' }),
+          anchor = document.createElement('a');
+
+      anchor.download = "state.json";
+      anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+      anchor.dataset.downloadurl = ['text/plain', anchor.download, anchor.href].join(':');
+      anchor.click();
+      //thank you liabru! https://gist.github.com/liabru/11263260
+    }
+
+
+    loadState = () => {
+      console.log("loading "+ this.props.name+"s")
+
+      var state = prompt("Copy the contents of your state file and paste it here:", '[{"id":"bar0","initiative":6,"name":"Test Monster","maxHP":5,"currentHP":0}]');
+
+      if (state != null) {
+        try{
+          let newState = JSON.parse(state);
+          console.log(newState)
+          this.setState({bars:[]},
+                () => this.setState({bars: newState}))
+        }
+        catch(error) {
+          window.alert("Invalid state to load")
+        }
+      }
+    }
+
+    render() {
+      return(
+        <div className={this.props.side}>
+          <div style ={{'min-height':'250px'}}>
+            <p className='headerText'>{this.props.name}s</p>
+            <table>
+            <tr className='headerRow'>
+              <td>Initiative</td>
+              <td>Name</td>
+              <td>Max HP</td>
+              <td>Current</td>
+              <td>Damage</td>
+            </tr>
+            {this.state.bars.map(bar => (
+            <HealthBar  id={bar.id}
+                        initiative={bar.initiative}
+                        name={bar.name}
+                        maxHP={bar.maxHP}
+                        currentHP={bar.currentHP}
+                        duplicateFunction={this.addBar}
+                        deleteFunction={this.deleteBar}
+                        updateParent={this.updateStore}
+                        />
+          ))}
+          <tr>
+            <td><button type='button' onClick={this.sortByInitiative}>Sort</button></td>
+            <td/><td/><td/><td/><td/><td/>
+            <td><button type='button' onClick={e => this.addBar()}>+</button></td>
+          </tr>
+          <tr>
+
+            <td/><td/><td/><td/><td/><td/>
+            <td><button type='button' onClick={this.saveState}>Save</button></td>
+            <td><button type='button' onClick={this.loadState}>Load</button></td>
+          </tr>
+
+          </table>
+          </div>
+          <div>
+
+          </div>
+        </div>
+      )
+    }
+  }
+
+  class HealthTracker extends React.Component {
+      constructor(props){
+        super(props);
+
+        this.state = {
+          help:   ("[Sort]: Sort these rows by initiative \n\n"+
+                  "[Dup]: Duplicate this row \n\n"+
+                  "[X]: Delete this row\n\n"+
+                  "[+]: Add a new row\n\n"+
+                  "[Save]: Open a dialog to save this panel's configuration into a .json file "+
+                  "(Monsters or Players, not both at once)    \n\n"+
+                  "[Load]: Load a previously saved configuration "+
+                  "-- Copy the contents of a previously saved configuration from its .json file and paste it into the dialog box\n\n"+
+                  "\n\n"+
+                  "- Damage can be entered as a number or a math operation (e.g. 3+5+9 or 4*8) \n\n"+
+                  "- Negative damage will heal the monster/player \n\n"),
+          showHelp: false
+
+        }
+      }
+
+      openHelp = () => {
+        let currentState = this.state.showHelp
+        this.setState({showHelp: !currentState})
+
+
+        //window.alert(help)
+      }
+
+      render() {
+        return (
+          <div>
+            <div>
+              <Panel name='Monster' side='leftBox'/>
+              <Panel name='Player'side='rightBox'/>
+              <div className={this.state.showHelp ? 'visible':'hidden'}>
+                <textarea readonly='true' rows='25' cols='40'>{this.state.help}</textarea>
+              </div>
+            </div>
+            <div style={{bottom:5, position:'absolute', width:'95%'}}>
+              <span style={{'float': 'left','visibility':'hidden'}}>(negative damage heals)</span>
+              <span style={{'float': 'right'}}><button type='button' onClick={this.openHelp}>{this.state.showHelp? 'Hide ':'Show '}Help</button></span>
+            </div>
+          </div>
+        )
+      }
+  }
+
+  ReactDOM.render(
+    <div id='background'>
+      <HealthTracker />
+    </div>,
+    document.getElementById("main")
+  );
+
+  </script>
+
+
+  <style>
+
+  .hidden {
+    visibility: hidden;
+  }
+
+  .visible {
+    visibility: visible;
+  }
+
+  textarea {
+      font-size: x-small;
+      background-color: black;
+      color: white;
+      font-family: Verdana;
+      border-width: 2px;
+      border-color: white;
+  }
+
+  .ninetyPercent {
+    min-height: 350px;
+  }
+
+  .leftBox {
+    padding-right:20px;
+    float:left;
+  }
+
+  .rightBox {
+    float: left;
+  }
+
+  .green {
+    background-color: green;
+    border-color: green;
+  }
+  .yellow {
+    background-color: yellow;
+    border-color: yellow;
+  }
+  .red {
+    background-color: red;
+    border-color: yellow;
+  }
+
+  .textInput {
+    width: 75px;
+    font-weight: bold;
+    text-overflow: clip;
+  }
+  .textInput:hover {
+    overflow: visible;
+  }
+
+  .numberInput {
+    width:45px;
+    font-weight: bold;
+    font-size: small;
+  }
+
+  .initiativeInput {
+    width:35px;
+    font-weight: bold;
+    font-size: small;
+  }
+
+  .headerRow {
+    font-size: small;
+  }
+
+  .headerText {
+    font-weight: bold;
+    font-size: xx-large;
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 5px;
+  }
+
+  .hitButton {
+    font-weight: bold;
+    border-color: black;
+    border-width: 5px;
+    shadow: 5px;
+  }
+
+  .rightBorder {
+    border-right: solid;
+    border-width: 1px;
+  }
+
+  body {
+    background-color: black;
+    color: white;
+    font-family: Verdana;
+  }
+  td {
+    padding:3px;
+    margin: 0px;
+    text-align: center;
+  }
+  table {
+
+    border-spacing: 0 3px;
+  }
+  </style>
+
+</html>
