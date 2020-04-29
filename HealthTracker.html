@@ -1,4 +1,3 @@
-<!--created by Andrew Battles-->
 <!DOCTYPE html>
 <html lang = "en">
   <head>
@@ -119,8 +118,6 @@
     }
 
 
-
-
     render() {
       return(
           <tr className={this.state.hpLevel}>
@@ -137,9 +134,68 @@
     }
   }
 
-  //class Player extends React.Component { <-- use monsters, just put in a new section
+  class BlankBar extends React.Component {
 
-  //}
+    constructor(props){
+      super(props);
+
+      this.state={
+        id: this.props.id,
+        initiative: this.props.initiative,
+        name: this.props.name
+      }
+    }
+
+    deleteSelf = () => {
+      //console.log('delete button pressed')
+      this.props.deleteFunction(this.state.id)
+    }
+
+    render() {
+      return(
+          <tr className='spacerBar'>
+            <td style={{'color':'gray'}}><i>{this.state.initiative}</i></td>
+            <td style={{'color':'gray'}}><i>{this.state.name}</i></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><button type='button' onClick={e => this.deleteSelf()}>X</button></td>
+          </tr>
+      )
+    }
+  }
+
+  class Bar extends React.Component {
+    //for deciding which kind of bar gets drawn
+    constructor(props){
+      super(props)
+    }
+    render(){
+      if(this.props.id.indexOf('bar')> -1) {
+      return(<HealthBar  id={this.props.id}
+                    initiative={this.props.initiative}
+                    name={this.props.name}
+                    maxHP={this.props.maxHP}
+                    currentHP={this.props.currentHP}
+                    duplicateFunction={this.props.duplicateFunction}
+                    deleteFunction={this.props.deleteFunction}
+                    updateParent={this.props.updateParent}
+                    /> )
+      }
+      else{
+          return (<BlankBar id={this.props.id}
+                    initiative={this.props.initiative}
+                    name={this.props.name}
+                    deleteFunction={this.props.deleteFunction}
+                    />  )
+
+      }
+    }
+
+  }
+
 
   class Panel extends React.Component {
     constructor(props){
@@ -159,25 +215,20 @@
       //console.log('add health bar');
       let currentList = this.state.bars;
       let newBar = null;
+
       if(duplicate) {
         //console.log('duplicating')
-        /*let lastChar = duplicate.name[duplicate.name.length-1];
-        let nextName = duplicate.name;
-        if(parseInt(lastChar) > -1){
-          let nextNum = parseInt(lastChar)+1;
-          console.log(nextName[nextName.length-1])
-          let splitName = nextName.split(lastChar)
-          console.log(splitName)
-          nextName = splitName[0]+nextNum
+        let split = duplicate.name.split(' ');
+        let lastNum = split[split.length-1]
+        if(parseInt(lastNum) > -1){
+          split.pop()
         }
-        else{
-          nextName = nextName + ' 1';
-        }*/
+        const newName = split.join(' ') + ' '+this.state.barCounter
 
         newBar = {
           id: 'bar'+this.state.barCounter,
           initiative: duplicate.initiative,
-          name: duplicate.name,//nextName, //+(this.state.barCounter+1),
+          name: newName, //duplicate.name
           maxHP: duplicate.maxHP,
           currentHP: duplicate.currentHP
         }
@@ -194,7 +245,30 @@
       }
       currentList.push(newBar);
       this.setState({barCounter: this.state.barCounter+1,
-                      bars: currentList})//, () => {console.log(this.state)});
+                      bars: currentList});//, () => {console.log(this.state)});
+    }
+
+    addBlankBarsAndSort = (duplicates) => {
+      let oldBars = this.state.bars;
+
+      //remove old blanks first.  Their id's are (blank+number) instead of (bar+number)
+      let currentList = oldBars.filter(bar => !bar.id.includes('blank'))
+      let newBar = {};
+      for(let i=0;i<duplicates.length;i++){
+        newBar  = {
+          id: 'blank'+this.state.barCounter+i,
+          initiative: duplicates[i].initiative,
+          name: duplicates[i].name,//nextName, //+(this.state.barCounter+1),
+          maxHP: 0,
+          currentHP: 0
+        }
+        currentList.push(newBar);
+      }
+      this.setState({barCounter: this.state.barCounter+duplicates.length,
+                     bars: currentList},
+                        () => this.sortByInitiative());
+
+
     }
 
     deleteBar = (id) => {
@@ -217,7 +291,7 @@
           bars[i].name = childState.name;
           bars[i].maxHP = childState.maxHP;
           bars[i].currentHP = childState.currentHP;
-          console.log(bars[i])
+          //console.log(bars[i])
         }
       }
       this.setState({bars: bars})
@@ -233,42 +307,105 @@
     }
 
     saveState = () => {
-      //console.log("saving "+ this.props.name+"s")
+      console.log("saving "+ this.props.name+"s")
 
-      var text = JSON.stringify(this.state.bars),
+      //remove old blanks first.  Their id's are (blank+number) instead of (bar+number)
+      let nonBlankBars = this.state.bars.filter(bar => bar.id.indexOf('blank') < 0)
+
+      var text = JSON.stringify(nonBlankBars),
           blob = new Blob([text], { type: 'text/plain' }),
           anchor = document.createElement('a');
 
-      anchor.download = "state.json";
+      anchor.download = this.props.name + "s-state.json";
       anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
       anchor.dataset.downloadurl = ['text/plain', anchor.download, anchor.href].join(':');
       anchor.click();
       //thank you liabru! https://gist.github.com/liabru/11263260
     }
 
+    openSelector = () => {
+      console.log('openSelector')
+      this.refs.fileInput.click()
+    }
 
-    loadState = () => {
-      //console.log("loading "+ this.props.name+"s")
+    loadState = (files,loadCallback) => {
+      console.log('loadState')
+      console.log(files)
+      console.log('files.length: '+files.length)
+      if(files.length > 1){
+        window.alert("Select only one file")
+      }
+      else {
+        if(files[0] && files[0].type == 'application/json') { //&& files[0].name.slice(-5) == '.json'){
+          console.log(files[0])
+          let reader = new FileReader();
 
-      var state = prompt("Copy the contents of your state file and paste it here:", '[{"id":"bar0","initiative":6,"name":"Test Monster","maxHP":5,"currentHP":0}]');
+          reader.readAsText(files[0]);
 
+          reader.onload = function() {
+            console.log(reader.result);
+            try {
+              const parsedText = JSON.parse(reader.result);
+              loadCallback(parsedText);
+            }
+            catch(err) {
+              console.warn(err)
+              window.alert("Invalid file type")
+              //window.alert("Not a valid state file, unable to load")
+            }
+
+          }
+
+          reader.onerror = function() {
+            window.alert(reader.error)
+          }
+
+        }
+        else{
+          window.alert("Invalid file type")
+        }
+      }
+    }
+
+    displayLoadedState = (state) => {
       if (state != null) {
         try{
-          let newState = JSON.parse(state);
+          for(let i=0;i<state.length;i++){
+            if(!this.checkFormat(state[i])){
+              throw("Invalid format: "+JSON.stringify(state[i]))
+            }
+          }
           //console.log(newState)
           this.setState({bars:[]},
-                () => this.setState({bars: newState}))
+                () => this.setState({bars: state}))
         }
         catch(error) {
-          window.alert("Invalid state to load")
+          console.warn(error)
+          window.alert("Not a valid state file, unable to load")
         }
+      }
+    }
+
+    checkFormat = (bar) => {
+      let keys = Object.keys(bar)
+      console.log(keys)
+      if( keys.length != 5
+      || keys[0] != 'id'
+      || keys[1] != 'initiative'
+      || keys[2] != 'name'
+      || keys[3] != 'maxHP'
+      || keys[4] != 'currentHP'){
+        return false;
+      }
+      else{
+        return true;
       }
     }
 
     render() {
       return(
         <div className={this.props.side}>
-          <div style ={{'min-height':'250px'}}>
+          <div style ={{'min-height':'200px'}}>
             <p className='headerText'>{this.props.name}s</p>
             <table>
             <tr className='headerRow'>
@@ -279,18 +416,18 @@
               <td>Damage</td>
             </tr>
             {this.state.bars.map(bar => (
-            <HealthBar  id={bar.id}
-                        initiative={bar.initiative}
-                        name={bar.name}
-                        maxHP={bar.maxHP}
-                        currentHP={bar.currentHP}
-                        duplicateFunction={this.addBar}
-                        deleteFunction={this.deleteBar}
-                        updateParent={this.updateStore}
-                        />
+                <Bar  id={bar.id}
+                      initiative={bar.initiative}
+                      name={bar.name}
+                      maxHP={bar.maxHP}
+                      currentHP={bar.currentHP}
+                      duplicateFunction={this.addBar}
+                      deleteFunction={this.deleteBar}
+                      updateParent={this.updateStore}
+                      />
           ))}
           <tr>
-            <td><button type='button' onClick={this.sortByInitiative}>Sort</button></td>
+            <td></td>
             <td/><td/><td/><td/><td/><td/>
             <td><button type='button' onClick={e => this.addBar()}>+</button></td>
           </tr>
@@ -298,18 +435,17 @@
 
             <td/><td/><td/><td/><td/><td/>
             <td><button type='button' onClick={this.saveState}>Save</button></td>
-            <td><button type='button' onClick={this.loadState}>Load</button></td>
+            <td><button type='button' onClick={this.openSelector}>Load</button></td>
           </tr>
 
           </table>
           </div>
-          <div>
-
-          </div>
+          <input ref='fileInput' type='file' style={{'display':'none'}} onChange={(e => this.loadState(e.target.files,this.displayLoadedState))} />
         </div>
       )
     }
   }
+  //<button type='button' onClick={this.sortByInitiative}>Sort</button>
 
   class HealthTracker extends React.Component {
       constructor(props){
@@ -322,8 +458,8 @@
                   "[+]: Add a new row\n\n"+
                   "[Save]: Open a dialog to save this panel's configuration into a .json file "+
                   "(Monsters or Players, not both at once)    \n\n"+
-                  "[Load]: Load a previously saved configuration "+
-                  "-- Copy the contents of a previously saved configuration from its .json file and paste it into the dialog box\n\n"+
+                  "[Load]: Load a previously saved configuration \n\n"+
+                  "[Sort Initiative]: Reorder players and monsters by their initiative \n\n"+
                   "\n\n"+
                   "- Damage can be entered as a number or a math operation (e.g. 3+5+9 or 4*8) \n\n"+
                   "- Negative damage will heal the monster/player \n\n"),
@@ -340,18 +476,37 @@
         //window.alert(help)
       }
 
+      structureByInitiative = () => {
+        //console.log('structureByInitiative')
+        //get bars from each ref
+        let playerBars = this.refs.players.state.bars;
+        playerBars = playerBars.filter(bar => !bar.id.includes('blank'))
+        let monsterBars = this.refs.monsters.state.bars;
+        monsterBars = monsterBars.filter(bar => !bar.id.includes('blank'))
+        //add blank bars to other sides
+        //run each side's sort function
+        this.refs.players.addBlankBarsAndSort(monsterBars);
+        this.refs.monsters.addBlankBarsAndSort(playerBars);
+
+
+      }
+
       render() {
         return (
           <div>
             <div>
-              <Panel name='Monster' side='leftBox'/>
-              <Panel name='Player'side='rightBox'/>
-              <div className={this.state.showHelp ? 'visible':'hidden'}>
-                <textarea readonly='true' rows='25' cols='40'>{this.state.help}</textarea>
+              <div>
+                <Panel name='Monster' ref='monsters' side='leftBox'/>
+                <Panel name='Player' ref='players' side='rightBox'/>
+                <div style={{'clear':'both'}}><button className='sortButton' type='button' className='sortButton' onClick={this.structureByInitiative}>Sort Initiative</button></div>
+              </div>
+
+              <div style={{'float':'right'}}>
+                <textarea className={this.state.showHelp ? 'visible':'hidden'} readonly='true' rows='25' cols='40'>{this.state.help}</textarea>
               </div>
             </div>
+
             <div style={{bottom:5, position:'absolute', width:'95%'}}>
-              <span style={{'float': 'left','visibility':'hidden'}}>(negative damage heals)</span>
               <span style={{'float': 'right'}}><button type='button' onClick={this.openHelp}>{this.state.showHelp? 'Hide ':'Show '}Help</button></span>
             </div>
           </div>
@@ -386,10 +541,6 @@
       font-family: Verdana;
       border-width: 2px;
       border-color: white;
-  }
-
-  .ninetyPercent {
-    min-height: 350px;
   }
 
   .leftBox {
@@ -454,9 +605,31 @@
     shadow: 5px;
   }
 
+  .sortButton {
+    font-weight: bold;
+    border-color: black;
+    /*border-width: 5px;*/
+    border-radius: 5px;
+    /*shadow: 5px;*/
+    width: 150px;
+    height: 35px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
   .rightBorder {
     border-right: solid;
     border-width: 1px;
+  }
+
+  .spacerBar {
+    color: gray;
+  }
+
+  .spacerBar button {
+    background-color: black;
+    border-color: gray;
+    color: gray;
   }
 
   body {

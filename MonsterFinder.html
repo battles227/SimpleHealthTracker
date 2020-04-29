@@ -1,0 +1,953 @@
+<html lang = "en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+    <p> MonsterTracker </p>
+    <div id="main"></div>
+
+  </body>
+
+  <script type='text/babel'>
+
+var legendary =  {
+  	"_id": "5e8b834d0b1bb138c54a54f9",
+  	"index": "adult-black-dragon",
+  	"name": "Adult Black Dragon",
+  	"size": "Huge",
+  	"type": "dragon",
+  	"subtype": null,
+  	"alignment": "chaotic evil",
+  	"armor_class": 19,
+  	"hit_points": 195,
+  	"hit_dice": "17d12",
+  	"speed": {
+  		"walk": "40 ft.",
+  		"fly": "80 ft.",
+  		"swim": "40 ft."
+  	},
+  	"strength": 23,
+  	"dexterity": 14,
+  	"constitution": 21,
+  	"intelligence": 14,
+  	"wisdom": 13,
+  	"charisma": 17,
+  	"proficiencies": [
+  		{
+  			"name": "Saving Throw: DEX",
+  			"url": "/api/proficiencies/saving-throw-dex",
+  			"value": 7
+  		},
+  		{
+  			"name": "Saving Throw: CON",
+  			"url": "/api/proficiencies/saving-throw-con",
+  			"value": 10
+  		},
+  		{
+  			"name": "Saving Throw: WIS",
+  			"url": "/api/proficiencies/saving-throw-wis",
+  			"value": 6
+  		},
+  		{
+  			"name": "Saving Throw: CHA",
+  			"url": "/api/proficiencies/saving-throw-cha",
+  			"value": 8
+  		},
+  		{
+  			"name": "Skill: Perception",
+  			"url": "/api/proficiencies/skill-perception",
+  			"value": 11
+  		},
+  		{
+  			"name": "Skill: Stealth",
+  			"url": "/api/proficiencies/skill-stealth",
+  			"value": 7
+  		}
+  	],
+  	"damage_vulnerabilities": [],
+  	"damage_resistances": [],
+  	"damage_immunities": [
+  		"acid"
+  	],
+  	"condition_immunities": [],
+  	"senses": {
+  		"blindsight": "60 ft.",
+  		"darkvision": "120 ft.",
+  		"passive_perception": 21
+  	},
+  	"languages": "Common, Draconic",
+  	"challenge_rating": 14,
+  	"special_abilities": [
+  		{
+  			"name": "Amphibious",
+  			"desc": "The dragon can breathe air and water."
+  		},
+  		{
+  			"name": "Legendary Resistance",
+  			"desc": "If the dragon fails a saving throw, it can choose to succeed instead.",
+  			"usage": {
+  				"type": "per day",
+  				"times": 3
+  			}
+  		}
+  	],
+  	"actions": [
+  		{
+  			"name": "Multiattack",
+  			"desc": "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."
+  		},
+  		{
+  			"name": "Bite",
+  			"desc": "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 4 (1d8) acid damage.",
+  			"attack_bonus": 11,
+  			"damage": [
+  				{
+  					"damage_type": {
+  						"name": "Piercing",
+  						"url": "/api/damage-types/piercing"
+  					},
+  					"damage_dice": "2d10",
+  					"damage_bonus": 6
+  				},
+  				{
+  					"type": "acid",
+  					"dice": "1d8",
+  					"bonus": 0
+  				}
+  			]
+  		},
+  		{
+  			"name": "Claw",
+  			"desc": "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage.",
+  			"attack_bonus": 11,
+  			"damage": [
+  				{
+  					"damage_type": {
+  						"name": "Slashing",
+  						"url": "/api/damage-types/slashing"
+  					},
+  					"damage_dice": "2d6",
+  					"damage_bonus": 6
+  				}
+  			]
+  		},
+  		{
+  			"name": "Tail",
+  			"desc": "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage.",
+  			"attack_bonus": 11,
+  			"damage": [
+  				{
+  					"damage_type": {
+  						"name": "Bludgeoning",
+  						"url": "/api/damage-types/bludgeoning"
+  					},
+  					"damage_dice": "2d8",
+  					"damage_bonus": 6
+  				}
+  			]
+  		},
+  		{
+  			"name": "Frightful Presence",
+  			"desc": "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours.",
+  			"dc": {
+  				"dc_type": {
+  					"name": "WIS",
+  					"url": "/api/ability-scores/wis"
+  				},
+  				"dc_value": 16,
+  				"success_type": "none"
+  			}
+  		},
+  		{
+  			"name": "Acid Breath",
+  			"desc": "The dragon exhales acid in a 60-foot line that is 5 feet wide. Each creature in that line must make a DC 18 Dexterity saving throw, taking 54 (12d8) acid damage on a failed save, or half as much damage on a successful one.",
+  			"usage": {
+  				"type": "recharge on roll",
+  				"dice": "1d6",
+  				"min_value": 5
+  			},
+  			"dc": {
+  				"dc_type": {
+  					"name": "DEX",
+  					"url": "/api/ability-scores/dex"
+  				},
+  				"dc_value": 18,
+  				"success_type": "half"
+  			},
+  			"damage": [
+  				{
+  					"damage_type": {
+  						"name": "Acid",
+  						"url": "/api/damage-types/acid"
+  					},
+  					"damage_dice": "12d8",
+  					"damage_bonus": 0
+  				}
+  			]
+  		}
+  	],
+  	"legendary_actions": [
+  		{
+  			"name": "Detect",
+  			"desc": "The dragon makes a Wisdom (Perception) check."
+  		},
+  		{
+  			"name": "Tail Attack",
+  			"desc": "The dragon makes a tail attack."
+  		},
+  		{
+  			"name": "Wing Attack (Costs 2 Actions)",
+  			"desc": "The dragon beats its wings. Each creature within 10 ft. of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.",
+  			"dc": {
+  				"dc_type": {
+  					"name": "DEX",
+  					"url": "/api/ability-scores/dex"
+  				},
+  				"dc_value": 19,
+  				"success_type": "none"
+  			},
+  			"damage": [
+  				{
+  					"damage_type": {
+  						"name": "Bludgeoning",
+  						"url": "/api/damage-types/bludgeoning"
+  					},
+  					"damage_dice": "2d6",
+  					"damage_bonus": 6
+  				}
+  			]
+  		}
+  	],
+  	"url": "/api/monsters/adult-black-dragon"
+  }
+
+  var aboleth = {
+	"_id": "5e8b834d0b1bb138c54a54f7",
+	"index": "aboleth",
+	"name": "Aboleth",
+	"size": "Large",
+	"type": "aberration",
+	"subtype": null,
+	"alignment": "lawful evil",
+	"armor_class": 17,
+	"hit_points": 135,
+	"hit_dice": "18d10",
+	"speed": {
+		"walk": "10 ft.",
+		"swim": "40 ft."
+	},
+	"strength": 21,
+	"dexterity": 9,
+	"constitution": 15,
+	"intelligence": 18,
+	"wisdom": 15,
+	"charisma": 18,
+	"proficiencies": [
+		{
+			"name": "Saving Throw: CON",
+			"url": "/api/proficiencies/saving-throw-con",
+			"value": 6
+		},
+		{
+			"name": "Saving Throw: INT",
+			"url": "/api/proficiencies/saving-throw-int",
+			"value": 8
+		},
+		{
+			"name": "Saving Throw: WIS",
+			"url": "/api/proficiencies/saving-throw-wis",
+			"value": 6
+		},
+		{
+			"name": "Skill: History",
+			"url": "/api/proficiencies/skill-history",
+			"value": 12
+		},
+		{
+			"name": "Skill: Perception",
+			"url": "/api/proficiencies/skill-perception",
+			"value": 10
+		}
+	],
+	"damage_vulnerabilities": [],
+	"damage_resistances": [],
+	"damage_immunities": [],
+	"condition_immunities": [],
+	"senses": {
+		"darkvision": "120 ft.",
+		"passive_perception": 20
+	},
+	"languages": "Deep Speech, telepathy 120 ft.",
+	"challenge_rating": 10,
+	"special_abilities": [
+		{
+			"name": "Amphibious",
+			"desc": "The aboleth can breathe air and water."
+		},
+		{
+			"name": "Mucous Cloud",
+			"desc": "While underwater, the aboleth is surrounded by transformative mucus. A creature that touches the aboleth or that hits it with a melee attack while within 5 ft. of it must make a DC 14 Constitution saving throw. On a failure, the creature is diseased for 1d4 hours. The diseased creature can breathe only underwater.",
+			"dc": {
+				"dc_type": {
+					"name": "CON",
+					"url": "/api/ability-scores/con"
+				},
+				"dc_value": 14,
+				"success_type": "none"
+			}
+		},
+		{
+			"name": "Probing Telepathy",
+			"desc": "If a creature communicates telepathically with the aboleth, the aboleth learns the creature's greatest desires if the aboleth can see the creature."
+		}
+	],
+	"actions": [
+		{
+			"name": "Multiattack",
+			"desc": "The aboleth makes three tentacle attacks."
+		},
+		{
+			"name": "Tentacle",
+			"desc": "Melee Weapon Attack: +9 to hit, reach 10 ft., one target. Hit: 12 (2d6 + 5) bludgeoning damage. If the target is a creature, it must succeed on a DC 14 Constitution saving throw or become diseased. The disease has no effect for 1 minute and can be removed by any magic that cures disease. After 1 minute, the diseased creature's skin becomes translucent and slimy, the creature can't regain hit points unless it is underwater, and the disease can be removed only by heal or another disease-curing spell of 6th level or higher. When the creature is outside a body of water, it takes 6 (1d12) acid damage every 10 minutes unless moisture is applied to the skin before 10 minutes have passed.",
+			"attack_bonus": 9,
+			"dc": {
+				"dc_type": {
+					"name": "CON",
+					"url": "/api/ability-scores/con"
+				},
+				"dc_value": 14,
+				"success_type": "none"
+			},
+			"damage": [
+				{
+					"damage_type": {
+						"name": "Acid",
+						"url": "/api/damage-types/acid"
+					},
+					"damage_dice": "2d6",
+					"damage_bonus": 5
+				}
+			]
+		},
+		{
+			"name": "Tail",
+			"desc": "Melee Weapon Attack: +9 to hit, reach 10 ft. one target. Hit: 15 (3d6 + 5) bludgeoning damage.",
+			"attack_bonus": 9,
+			"damage": [
+				{
+					"damage_type": {
+						"name": "Bludgeoning",
+						"url": "/api/damage-types/bludgeoning"
+					},
+					"damage_dice": "3d6",
+					"damage_bonus": 5
+				}
+			]
+		},
+		{
+			"name": "Enslave",
+			"desc": "The aboleth targets one creature it can see within 30 ft. of it. The target must succeed on a DC 14 Wisdom saving throw or be magically charmed by the aboleth until the aboleth dies or until it is on a different plane of existence from the target. The charmed target is under the aboleth's control and can't take reactions, and the aboleth and the target can communicate telepathically with each other over any distance.\nWhenever the charmed target takes damage, the target can repeat the saving throw. On a success, the effect ends. No more than once every 24 hours, the target can also repeat the saving throw when it is at least 1 mile away from the aboleth.",
+			"usage": {
+				"type": "per day",
+				"times": 3
+			},
+			"dc": {
+				"dc_type": {
+					"name": "WIS",
+					"url": "/api/ability-scores/wis"
+				},
+				"dc_value": 14,
+				"success_type": "none"
+			}
+		}
+	],
+	"legendary_actions": [
+		{
+			"name": "Detect",
+			"desc": "The aboleth makes a Wisdom (Perception) check."
+		},
+		{
+			"name": "Tail Swipe",
+			"desc": "The aboleth makes one tail attack."
+		},
+		{
+			"name": "Psychic Drain (Costs 2 Actions)",
+			"desc": "One creature charmed by the aboleth takes 10 (3d6) psychic damage, and the aboleth regains hit points equal to the damage the creature takes.",
+			"attack_bonus": 0,
+			"damage": [
+				{
+					"damage_type": {
+						"name": "Psychic",
+						"url": "/api/damage-types/psychic"
+					},
+					"damage_dice": "3d6",
+					"damage_bonus": 0
+				}
+			]
+		}
+	],
+	"url": "/api/monsters/aboleth"
+}
+  var normal = {
+	"_id": "5e8b834e0b1bb138c54a55aa",
+	"index": "kobold",
+	"name": "Kobold",
+	"size": "Small",
+	"type": "humanoid",
+	"subtype": "kobold",
+	"alignment": "lawful evil",
+	"armor_class": 12,
+	"hit_points": 5,
+	"hit_dice": "2d6",
+	"speed": {
+		"walk": "30 ft."
+	},
+	"strength": 7,
+	"dexterity": 15,
+	"constitution": 9,
+	"intelligence": 8,
+	"wisdom": 7,
+	"charisma": 8,
+	"proficiencies": [],
+	"damage_vulnerabilities": [],
+	"damage_resistances": [],
+	"damage_immunities": [],
+	"condition_immunities": [],
+	"senses": {
+		"darkvision": "60 ft.",
+		"passive_perception": 8
+	},
+	"languages": "Common, Draconic",
+	"challenge_rating": 0.125,
+	"special_abilities": [
+		{
+			"name": "Sunlight Sensitivity",
+			"desc": "While in sunlight, the kobold has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight."
+		},
+		{
+			"name": "Pack Tactics",
+			"desc": "The kobold has advantage on an attack roll against a creature if at least one of the kobold's allies is within 5 ft. of the creature and the ally isn't incapacitated."
+		}
+	],
+	"actions": [
+		{
+			"name": "Dagger",
+			"desc": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 4 (1d4 + 2) piercing damage.",
+			"attack_bonus": 4,
+			"damage": [
+				{
+					"damage_type": {
+						"name": "Piercing",
+						"url": "/api/damage-types/piercing"
+					},
+					"damage_dice": "1d4",
+					"damage_bonus": 2
+				}
+			]
+		},
+		{
+			"name": "Sling",
+			"desc": "Ranged Weapon Attack: +4 to hit, range 30/120 ft., one target. Hit: 4 (1d4 + 2) bludgeoning damage.",
+			"attack_bonus": 4,
+			"damage": [
+				{
+					"damage_type": {
+						"name": "Bludgeoning",
+						"url": "/api/damage-types/bludgeoning"
+					},
+					"damage_dice": "1d4",
+					"damage_bonus": 2
+				}
+			]
+		}
+	],
+	"url": "/api/monsters/kobold"
+}
+
+  const letters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+
+  class Dropdown extends React.Component {
+    constructor(props){
+     super(props);
+     this.state = {
+           displayMenu: false,
+           optionsList: props.options,
+           selected: props.selected
+
+         };
+
+         this.showDropdownMenu = this.showDropdownMenu.bind(this);
+         this.hideDropdownMenu = this.hideDropdownMenu.bind(this);
+    }
+    componentDidUpdate(prevProps,prevState){
+
+      if(this.props.options && this.props.options != prevProps.options){
+        console.log('updating dropdown')
+        if(this.props.options.length < 1){
+          this.setState({optionsList: ["(none)"]}, () => {this.setState({selected: this.state.optionsList[0]})})
+        }
+        else {
+          this.setState({optionsList: this.props.options},() => {this.setState({selected: this.state.optionsList[0]})})
+        }
+      }
+    }
+
+
+    showDropdownMenu(event) {
+      //console.log(this.state.optionsList);
+        event.preventDefault();
+        this.setState({ displayMenu: true }, () => {
+        document.addEventListener('click', this.hideDropdownMenu);
+        });
+      }
+
+      hideDropdownMenu() {
+        if (this.dropdownMenu.contains(event.target)) {
+          this.setState({selected: event.target.attributes.name.value,
+                         displayMenu: false}, () => {
+                           document.removeEventListener('click', this.hideDropdownMenu);
+                           if (typeof this.props.changeFunction === 'function') {
+                             this.props.changeFunction(event.target.attributes.name.value);
+                           }
+                         })
+        }
+        else {
+          this.setState({ displayMenu: false }, () => {
+            document.removeEventListener('click', this.hideDropdownMenu);
+          });
+        }
+
+      }
+
+      returnLabel(){
+        return this.state.selected;
+      }
+
+    render() {
+      return (
+          <div className={this.props.narrow? "dropdown-narrow":"dropdown"} ref={(element) => {
+            this.dropdownMenu = element;
+          }}>
+           <div className={this.props.narrow? "dropdownbutton-narrow":"dropdownbutton"}
+              onClick={this.showDropdownMenu}>{this.state.selected}</div>
+            { this.state.displayMenu ?
+              (<ul>{this.state.optionsList.map( (option) =><li name={option}>{option}</li>)}</ul>) : (null)
+            }
+         </div>
+      );
+    }
+  }
+
+  class ResultsDisplay extends React.Component {
+    constructor(props){
+      super(props);
+    }
+
+    getTh = (num) => {
+      if(num > 3){
+        return num+'th';
+      }
+      if(num == 3){
+        return num+'rd';
+      }
+      if(num == 2){
+        return num+'nd'
+      }
+      if(num == 1){
+        return num+'st'
+      }
+      else {
+        return 'Cantrip'
+      }
+    }
+
+    splitSpeed = (speed) => {
+      let keys = Object.keys(speed);
+      let values = Object.values(speed);
+
+      let returnString = ''
+      for(let i=0;i<keys.length;i++){
+        returnString += keys[i]+ ' '+values[i];
+        if(i!=keys.length-1){
+          returnString += ', '
+        }
+      }
+      return returnString;
+    }
+
+    getMod = (score) => {
+      let returnString = ''
+      let math;
+      if(score<10){
+        returnString += '-'
+        math = 5-Math.floor(score/2)
+      }
+      else {
+        returnString += '+'
+        math = Math.floor((score-10)/2)
+      }
+      returnString += math;
+      return returnString;
+    }
+
+    getProficiency = (proficiencies,label) => {
+
+      let profArray = proficiencies.filter(prof => prof.name.includes(label))
+
+      if(profArray.length > 0){
+        let arr = []
+        let str = ''
+        let returnString ='';
+
+        for(let i=0;i<profArray.length;i++){
+          arr = profArray[i].name.split(':')
+          str = arr[arr.length-1]
+          returnString += (str +' +'+profArray[i].value);
+          //console.log(returnString)
+          if(i!=profArray.length-1){
+            returnString +=','
+          }
+        }
+        //console.log([(label+ 's:'), returnString])
+        return [(label+ 's:'), returnString]
+      }
+      else {
+        return []
+      }
+    }
+
+    getProficiencyLines = (line) => {
+      if(line.proficiencies && line.proficiencies.length > 0){
+        let throws = this.getProficiency(line.proficiencies,'Saving Throw')
+        let skills = this.getProficiency(line.proficiencies,'Skill')
+        //console.log([throws, skills])
+        return [throws, skills]
+      }
+      else{
+        //console.log('no proficiencies')
+        return []
+      }
+    }
+
+    getSenses = (senses) => {
+      let returnString = ''
+      let keys = Object.keys(senses);
+      let values = Object.values(senses);
+      for(let i=0;i<keys.length;i++){
+        let thisSense = keys[i]
+        thisSense[0].toUpperCase();
+        thisSense.split('_').join(' ')
+        returnString +=(thisSense + ': '+values[i])
+        if(i != keys.length-1){
+          returnString += ', '
+        }
+      }
+      return returnString;
+    }
+
+    getCR =(cr) => {
+      if(cr<1){
+        let denominator = 1/cr;
+        return '1/'+denominator
+      }
+      return cr;
+    }
+
+
+    render() {
+
+      return (
+        <div>
+          {this.props.results.map(line => (
+          <div>
+            <h1> {line.name}</h1>
+
+            <p><i>{line.size} {line.type} {line.subtype? ('('+line.subtype+')'):''}, {line.alignment}</i></p>
+            <hr></hr>
+            <p><b>Armor Class:</b> {line.armor_class}</p>
+            <p><b>Hit Points:</b> {line.hit_points} ({line.hit_dice})</p>
+            <p><b>Speed:</b> {this.splitSpeed(line.speed)}</p>
+            <hr></hr>
+            <table classname='stattable'>
+              <tr className='statbox'><td>STR</td><td>DEX</td><td>CON</td><td>INT</td><td>WIS</td><td>CHR</td></tr>
+              <tr><td>{line.strength} ({this.getMod(line.strength)})</td>
+                  <td>{line.dexterity} ({this.getMod(line.dexterity)})</td>
+                  <td>{line.constitution} ({this.getMod(line.constitution)})</td>
+                  <td>{line.intelligence} ({this.getMod(line.intelligence)})</td>
+                  <td>{line.wisdom} ({this.getMod(line.wisdom)})</td>
+                  <td>{line.charisma} ({this.getMod(line.charisma)})</td></tr>
+            </table>
+            <hr></hr>
+            {this.getProficiencyLines(line).map(profLine =>
+              <p><b>{profLine[0]}</b>{profLine[1]}</p>
+            )}
+            <p><b>Senses:</b> {this.getSenses(line.senses)}</p>
+            <p><b>Languages:</b> {line.languages}</p>
+            <p><b>Challenge:</b> {this.getCR(line.challenge_rating)}</p>
+            <hr></hr>
+            {line.special_abilities ? line.special_abilities.map(ability =>
+              <p><b><i>{ability.name}.</i></b>  {ability.desc}</p>
+            ): ''}
+            <h2><b><u>ACTIONS</u></b></h2>
+            {line.actions.map(action =>
+              <p><b><i>{action.name}.</i></b>  {action.desc}</p>
+            )}
+
+            {line.legendary_actions ? <div><h2><b><u>LEGENDARY ACTIONS</u></b></h2>
+                <p>The {line.name} can take 3 legendary actions, choosing from the options below. Only one legendary action can be used at a time and only at the end of another creature''s turn. The {line.name} regains spent legendary actions at the start of its turn.</p></div>
+              :''}
+            {line.legendary_actions ? line.legendary_actions.map(action =>
+              <p><b><i>{action.name}.</i></b>  {action.desc}</p>
+            ):''}
+
+
+          </div>
+          ))}
+        </div>
+      )
+    }
+
+  }
+
+    class MonsterTracker extends React.Component {
+      constructor(props){
+        super(props);
+
+        this.state = {
+          fullMonsterList: [],
+          monsterList: [],
+          monsterToDisplay: []
+          //showSpinner: false
+        }
+        //console.log(this.state.monsterList)
+      }
+      componentDidMount = () => {
+        this.dndApi('/api/monsters', this.setupList)
+      }
+
+      setupList = (fullList) => {
+        //console.log('Loading monster list')
+        this.setState({fullMonsterList: fullList.results},() => {
+          this.loadNewLetterMonsters('A');
+          this.newSelection(this.state.fullMonsterList[0].name)
+        })
+      }
+
+
+      loadNewLetterMonsters = (letter) => {
+        //console.log('Setting up dropdown for --'+letter+'--')
+        let sortedMonsters = this.getMonstersByLetter(letter)
+        console.log(sortedMonsters)
+        this.setState({monsterList: sortedMonsters})
+      }
+
+      getMonstersByLetter = (letter) => {
+        let allMonsters = this.state.fullMonsterList;
+        let letterMonsters = [];
+        for(let i=0;i<allMonsters.length;i++){
+          if(allMonsters[i].name[0].toUpperCase() == letter) {
+            letterMonsters.push(allMonsters[i].name)
+          }
+        }
+        //console.log(letterMonsters)
+        return letterMonsters;
+      }
+
+      newSelection = (sel) => {
+        //console.log("monster selected: "+sel)
+        let allMonsters = this.state.fullMonsterList;
+        const monster = allMonsters.filter(monster => monster.name == sel);
+        //console.log(monster[0])
+        if(monster.length > 0){
+          this.dndApi(monster[0].url,this.updateDisplay)
+        }
+      }
+
+      updateDisplay = (monster) => {
+        this.setState({monsterToDisplay: [monster]})
+        //this.setState({showSpinner: false});
+      }
+
+
+      dndApi = (url,callback) => {
+        //this.setState({showSpinner: true})
+        console.log('querying for '+url)
+        var fullUrl  = "http://www.dnd5eapi.co"+url;
+        var xhr  = new XMLHttpRequest()
+        xhr.open('GET', fullUrl, true)
+        xhr.onload = function () {
+        	var res = JSON.parse(xhr.responseText);
+        	if (xhr.readyState == 4 && xhr.status == "200") {
+        		//console.log(res);
+            callback(res);
+        	} else {
+        		console.error(res);
+        	}
+        }
+        xhr.send(null);
+      }
+
+      getMonsterNames = (array) => {
+        let nameArray = []
+        for(let i=0;i<array.length;i++){
+          nameArray.push(array[i].name)
+        }
+        return nameArray;
+      }
+
+
+
+      render() {
+        return (
+          <div>
+            <tr>
+              <td>
+                <Dropdown selected={letters[0]} options={letters} narrow={true} changeFunction={this.loadNewLetterMonsters} />
+              </td><td>
+                <Dropdown selected={this.state.monsterList[0]} options={this.state.monsterList} narrow={false} changeFunction={this.newSelection} />
+              </td>
+
+            </tr>
+              <ResultsDisplay results={this.state.monsterToDisplay} />
+          </div>
+        )
+      }
+    }
+
+    ReactDOM.render(
+      <div id='background'>
+        <MonsterTracker />
+      </div>,
+      document.getElementById("main")
+    );
+//<td><img id='spinner' className={this.state.showSpinner? 'spinner':'hidden'} src='spinningDie.gif' alt='loading' /></td>
+
+  </script>
+  <style>
+
+  body {
+    background-color: black;
+    color: white;
+    font-family: Verdana;
+  }
+  td {
+    padding: 5px;
+  }
+  .statbox td {
+    font-weight: bold;
+    text-align: center;
+  }
+
+  /*table {
+    border-style: solid;
+    border-top: solid;
+    border-bottom: solid;
+    border-width: 1px;
+    border-color: white;
+  }*/
+
+  hr {
+  display: block;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  margin-left: auto;
+  margin-right: auto;
+  border-style: inset;
+  border-width: 1px;
+}
+
+  /*.spinner {
+    height: 30px;
+  }
+  .hidden {
+    display: none;
+  }*/
+
+/* Dropdown Styling */
+  .dropdown {
+       position: relative;
+       display: inline-block;
+       background-color: #e5e5e5;
+  }
+  .dropdown-narrow {
+       position: relative;
+       display: inline-block;
+       background-color: #e5e5e5;
+       width: 60px;
+  }
+
+  .dropdown-narrow ul {
+    width: 40px;
+  }
+  ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        top:50px;
+        right:0px;
+        width: 250px;
+        background-color: #DCDAD1;
+        position: absolute;
+        font-size: 15px;
+        box-shadow: 0px 8px 18px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+   }
+    li a {
+        color: black;
+        text-decoration: none;
+   }
+    li {
+        padding: 8px 16px;
+        border-bottom: 1px solid #e5e5e5;
+        color:black;
+   }
+    li:last-child {
+        border-bottom: none;
+   }
+    li:hover {
+        background-color: #e5e5e5;
+        color: black;;
+   }
+    .dropdownbutton{
+        width:250px;
+        height:18px;
+        padding:10px;
+        border-radius:5px;
+
+        color:black;
+   }
+   .dropdownbutton-narrow {
+       width:80px;
+       height:18px;
+       padding:10px;
+       border-radius:5px;
+
+       color:black;
+   }
+
+   .dropdownbutton:before {
+        content:"";
+        position:absolute;
+        width:0px;
+        height:0px;
+        border: 10px solid;
+        border-color: black transparent transparent transparent;
+        right:6px;
+        top:18px;
+   }
+   .dropdownbutton-narrow:before{
+        content:"";
+        position:absolute;
+        width:0px;
+        height:0px;
+        border: 10px solid;
+        border-color: black transparent transparent transparent;
+        right:6px;
+        top:18px;
+   }
+  </style>
+
+</html>
