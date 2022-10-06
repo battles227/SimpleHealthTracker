@@ -25,6 +25,7 @@
         name: this.props.name,
         maxHP: this.props.maxHP,
         currentHP: this.props.currentHP,
+        activeConditions: this.props.activeConditions,
         toChange: 0,
         hpLevel: 'green'
       }
@@ -35,57 +36,50 @@
     }
 
     updateInitiative = (num) => {
-      //console.log('update Init: '+num)
       this.setState({initiative: num},() => this.updateParent())
     }
-
     updateName = (name) => {
-      //console.log("update name: "+name)
       this.setState({name: name},() => this.updateParent())
     }
-
     updateMax = (num) => {
-      //console.log('updateHealth: '+num)
       this.setState({maxHP: num},() => this.checkLevel())
     }
-
     updateCurrent = (num) => {
-      //console.log('updateCurrent: '+ num)
       this.setState({currentHP: num},() => this.checkLevel())
     }
 
+    updateConditions = (conditions) => {
+      let conditionsAsList = conditions.filter((conditionObj) => {return conditionObj.active});
+      let flattenedConditions = conditionsAsList.map((condition) => {
+        return condition.name
+      })
+      this.setState({activeConditions: flattenedConditions},() => {
+        this.updateParent()
+      })
+    }
+
     updateChange = (num) => {
-      //console.log('updateChange: '+num)
       if(typeof(num) == 'number') {
         this.setState({toChange: num})
       }
       else {
           try{
-            //console.log(typeof(num))
-            //console.log(num)
             let value = eval(num)
-            //console.log('value: '+value)
             this.setState({toChange: value})
           }
           catch(e){
-            //console.log('no change')
           }
       }
       //if typeof num == string, eval(num) first
-
-
     }
 
     applyChange = () => {
-      //console.log('apply change')
       this.updateCurrent(this.state.currentHP - this.state.toChange)
-      let changeField = document.getElementById('changeField')
+      let changeField = document.getElementById('changeField'+this.props.id)
       changeField.value = this.state.toChange;
     }
 
     checkLevel = () => {
-      //console.log('check level: '+this.state.currentHP + '/'+ this.state.maxHP)
-      //console.log(this.state)
       if(this.state.currentHP <= 0){
         this.setState({hpLevel: 'red'})
       }
@@ -101,39 +95,80 @@
     }
 
     updateParent = () => {
-      //console.log('-sending---')
-      //console.log(this.state)
-      //console.log('-----')
       this.props.updateParent(this.state)
     }
-
     duplicate = () => {
-      //console.log('duplicate button pressed')
       this.props.duplicateFunction(this.state)
     }
-
     deleteSelf = () => {
-      //console.log('delete button pressed')
       this.props.deleteFunction(this.state.id)
     }
 
-
     render() {
+      let changeFieldId = 'changeField'+this.props.id
       return(
           <tr className={this.state.hpLevel}>
             <td><input className="initiativeInput" type='number' min={1} value={this.state.initiative} onChange={e => this.updateInitiative(e.target.value)}/></td>
             <td><input className="textInput" type="textarea" value={this.state.name} onChange={e => this.updateName(e.target.value)}/></td>
             <td><input className="numberInput" type='number' value={this.state.maxHP} onChange={e => this.updateMax(parseInt(e.target.value))}/></td>
             <td><input className="numberInput" type='number' value={this.state.currentHP} onChange={e => this.updateCurrent(parseInt(e.target.value))}/></td>
-            <td><input id='changeField' className="numberInput" type='textarea' defaultValue={0} onChange={e => this.updateChange(e.target.value)}/></td>
-            <td><button className="hitButton" disabled={this.state.toChange ==0} type='button' onClick={e => this.applyChange()}>{this.state.toChange >= 0 ? "HIT 'EM!":"Heal 'em"}</button></td>
+            <td><input id={changeFieldId} className="numberInput" type='textarea' defaultValue={0} onChange={e => this.updateChange(e.target.value)}/></td>
+            <td><button className="hitButton" disabled={this.state.toChange ==0} type='button' onClick={e => this.applyChange()}>{this.state.toChange >= 0 ? "HIT!":"Heal"}</button></td>
+            <td><ConditionBlock activeConditions={this.state.activeConditions} updateConditions={this.updateConditions}/></td>
             <td><button type='button' onClick={e => this.duplicate()}>Dup.</button></td>
             <td><button type='button' onClick={e => this.deleteSelf()}>X</button></td>
           </tr>
       )
     }
   }
+  //</HealthBar>
+  class ConditionBlock extends React.Component {
+    constructor(props){
+      super(props);
 
+      this.buttonList = ['maroon','orange','olive','chartreuse','blue','purple', 'white','cyan'];
+
+      this.state = {
+        conditionList: this.buttonList.map((option) => {
+          return {
+            'name':option,
+            'active': props.activeConditions && props.activeConditions.find((thisCondition) => {return thisCondition == option}) || false
+          }
+        })
+      }
+    }
+
+    toggleCondition = (toChange) => {
+      let fullList = this.state.conditionList;
+      let thisCondition = fullList.find((condition) => {
+        return condition.name == toChange.name;
+      })
+
+      //if condition active, deactivate
+      if(thisCondition){
+        thisCondition.active = !thisCondition.active;
+        this.setState({conditionList: fullList}, () => {
+          this.props.updateConditions(this.state.conditionList)
+        })
+      }
+    }
+
+    render() {
+      return(
+        <span className='conditions'>
+          {this.state.conditionList.map(condition => (
+              <button
+                name={condition.name}
+                onClick={() => this.toggleCondition(condition)}
+                style={{'background-color': (condition.active ? condition.name : 'gray')}}
+                />
+            ))}
+        </span>
+      )
+    }
+
+  }
+  //</ConditionBlock>
   class BlankBar extends React.Component {
 
     constructor(props){
@@ -147,7 +182,6 @@
     }
 
     deleteSelf = () => {
-      //console.log('delete button pressed')
       this.props.deleteFunction(this.state.id)
     }
 
@@ -156,17 +190,18 @@
           <tr className='spacerBar'>
             <td style={{'color':'gray'}}><i>{this.state.initiative}</i></td>
             <td style={{'color':'gray'}}><i>{this.state.name}</i></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td></td> //maxHP
+            <td></td> //currentHP
+            <td></td> //damage bar
+            <td></td> //hit button
+            <td></td> //conditions
+            <td></td> //dup button
             <td><button type='button' onClick={e => this.deleteSelf()}>X</button></td>
           </tr>
       )
     }
   }
-
+  //</BlankBar>
   class Bar extends React.Component {
     //for deciding which kind of bar gets drawn
     constructor(props){
@@ -174,15 +209,16 @@
     }
     render(){
       if(this.props.id.indexOf('bar')> -1) {
-      return(<HealthBar  id={this.props.id}
-                    initiative={this.props.initiative}
-                    name={this.props.name}
-                    maxHP={this.props.maxHP}
-                    currentHP={this.props.currentHP}
-                    duplicateFunction={this.props.duplicateFunction}
-                    deleteFunction={this.props.deleteFunction}
-                    updateParent={this.props.updateParent}
-                    /> )
+        return(<HealthBar  id={this.props.id}
+                      initiative={this.props.initiative}
+                      name={this.props.name}
+                      maxHP={this.props.maxHP}
+                      currentHP={this.props.currentHP}
+                      activeConditions={this.props.activeConditions}
+                      duplicateFunction={this.props.duplicateFunction}
+                      deleteFunction={this.props.deleteFunction}
+                      updateParent={this.props.updateParent}
+                      /> )
       }
       else{
           return (<BlankBar id={this.props.id}
@@ -195,7 +231,7 @@
     }
 
   }
-
+  //</Bar>
 
   class Panel extends React.Component {
     constructor(props){
@@ -212,12 +248,13 @@
     }
 
     addBar = (duplicate) => {
-      //console.log('add health bar');
       let currentList = this.state.bars;
       let newBar = null;
+      let date = new Date()
+      let timeForId = date.getTime()
 
       if(duplicate) {
-        //console.log('duplicating')
+        //if it has a number at the end, remove it and add current barCounter num
         let split = duplicate.name.split(' ');
         let lastNum = split[split.length-1]
         if(parseInt(lastNum) > -1){
@@ -226,26 +263,27 @@
         const newName = split.join(' ') + ' '+this.state.barCounter
 
         newBar = {
-          id: 'bar'+this.state.barCounter,
+          id: 'bar'+timeForId,
           initiative: duplicate.initiative,
           name: newName, //duplicate.name
           maxHP: duplicate.maxHP,
-          currentHP: duplicate.currentHP
+          currentHP: duplicate.currentHP,
+          activeConditions: duplicate.activeConditions
         }
       }
       else{
-        //console.log('new bar')
         newBar = {
-          id: 'bar'+this.state.barCounter,
+          id: 'bar'+timeForId,
           initiative: 1,
           name: this.props.name+' '+this.state.barCounter,
           maxHP: 50,
-          currentHP: 50
+          currentHP: 50,
+          activeConditions: []
         }
       }
       currentList.push(newBar);
       this.setState({barCounter: this.state.barCounter+1,
-                      bars: currentList});//, () => {console.log(this.state)});
+                      bars: currentList});
     }
 
     addBlankBarsAndSort = (duplicates) => {
@@ -258,9 +296,10 @@
         newBar  = {
           id: 'blank'+this.state.barCounter+i,
           initiative: duplicates[i].initiative,
-          name: duplicates[i].name,//nextName, //+(this.state.barCounter+1),
+          name: duplicates[i].name,
           maxHP: 0,
-          currentHP: 0
+          currentHP: 0,
+          activeConditions: []
         }
         currentList.push(newBar);
       }
@@ -272,46 +311,39 @@
     }
 
     deleteBar = (id) => {
-      //console.log('deleteBar: '+id)
       let bars = this.state.bars;
-      //console.log(bars)
       const filteredBars = bars.filter(bar => bar.id != id);
-      //console.log(filteredBars)
       this.setState({bars: []},
         () => this.setState({bars: filteredBars}));
     }
 
     updateStore = (childState) => {
-      //console.log('updateStore: '+childState.id)
       let bars = this.state.bars;
-      for(let i=0;i<bars.length;i++){
-        if(bars[i].id == childState.id){
-          bars[i].id = childState.id;
-          bars[i].initiative = childState.initiative;
-          bars[i].name = childState.name;
-          bars[i].maxHP = childState.maxHP;
-          bars[i].currentHP = childState.currentHP;
-          //console.log(bars[i])
-        }
+      let thisBar = bars.find((bar)=> {
+        return bar.id == childState.id
+      })
+
+      if(thisBar){
+        thisBar.initiative = childState.initiative;
+        thisBar.name = childState.name;
+        thisBar.maxHP = childState.maxHP;
+        thisBar.currentHP = childState.currentHP;
+        thisBar.activeConditions = childState.activeConditions;
       }
       this.setState({bars: bars})
     }
 
     sortByInitiative = () => {
-      //console.log('sortByInitiative')
       let bars = this.state.bars;
-      //console.log(bars)
       bars.sort(function(a,b){return (b.initiative - a.initiative)});
       this.setState({bars:[]},
         () => this.setState({bars:bars}));
     }
 
     saveState = () => {
-      console.log("saving "+ this.props.name+"s")
-
       //remove old blanks first.  Their id's are (blank+number) instead of (bar+number)
       let nonBlankBars = this.state.bars.filter(bar => bar.id.indexOf('blank') < 0)
-
+      //console.log('bars to save: ',nonBlankBars)
       var text = JSON.stringify(nonBlankBars),
           blob = new Blob([text], { type: 'text/plain' }),
           anchor = document.createElement('a');
@@ -320,38 +352,32 @@
       anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
       anchor.dataset.downloadurl = ['text/plain', anchor.download, anchor.href].join(':');
       anchor.click();
-      //thank you liabru! https://gist.github.com/liabru/11263260
+      //thank you for the anchor liabru! https://gist.github.com/liabru/11263260
     }
 
     openSelector = () => {
-      console.log('openSelector')
       this.refs.fileInput.click()
     }
 
     loadState = (files,loadCallback) => {
-      console.log('loadState')
-      console.log(files)
-      console.log('files.length: '+files.length)
       if(files.length > 1){
         window.alert("Select only one file")
       }
       else {
-        if(files[0] && files[0].type == 'application/json') { //&& files[0].name.slice(-5) == '.json'){
-          console.log(files[0])
+        if(files[0] && files[0].type == 'application/json') {
+
           let reader = new FileReader();
-
           reader.readAsText(files[0]);
-
           reader.onload = function() {
-            console.log(reader.result);
+            //console.log('reader.result: ',reader.result);
             try {
               const parsedText = JSON.parse(reader.result);
+              //console.log('parsedText: ',parsedText)
               loadCallback(parsedText);
             }
             catch(err) {
               console.warn(err)
               window.alert("Invalid file type")
-              //window.alert("Not a valid state file, unable to load")
             }
 
           }
@@ -375,12 +401,10 @@
               throw("Invalid format: "+JSON.stringify(state[i]))
             }
           }
-          //console.log(newState)
           this.setState({bars:[]},
                 () => this.setState({bars: state}))
         }
         catch(error) {
-          console.warn(error)
           window.alert("Not a valid state file, unable to load")
         }
       }
@@ -388,18 +412,16 @@
 
     checkFormat = (bar) => {
       let keys = Object.keys(bar)
-      console.log(keys)
-      if( keys.length != 5
+      if( keys.length < 5
       || keys[0] != 'id'
       || keys[1] != 'initiative'
       || keys[2] != 'name'
       || keys[3] != 'maxHP'
       || keys[4] != 'currentHP'){
+        //skip keys[5] (status effects) to support old versions
         return false;
       }
-      else{
-        return true;
-      }
+      return true;
     }
 
     render() {
@@ -414,6 +436,8 @@
               <td>Max HP</td>
               <td>Current</td>
               <td>Damage</td>
+              <td></td>
+              <td>Conditions</td>
             </tr>
             {this.state.bars.map(bar => (
                 <Bar  id={bar.id}
@@ -421,6 +445,7 @@
                       name={bar.name}
                       maxHP={bar.maxHP}
                       currentHP={bar.currentHP}
+                      activeConditions={bar.activeConditions}
                       duplicateFunction={this.addBar}
                       deleteFunction={this.deleteBar}
                       updateParent={this.updateStore}
@@ -445,7 +470,7 @@
       )
     }
   }
-  //<button type='button' onClick={this.sortByInitiative}>Sort</button>
+  //</Panel>
 
   class HealthTracker extends React.Component {
       constructor(props){
@@ -477,7 +502,6 @@
       }
 
       structureByInitiative = () => {
-        //console.log('structureByInitiative')
         //get bars from each ref
         let playerBars = this.refs.players.state.bars;
         playerBars = playerBars.filter(bar => !bar.id.includes('blank'))
@@ -500,20 +524,17 @@
                 <Panel name='Player' ref='players' side='rightBox'/>
                 <div style={{'clear':'both'}}><button className='sortButton' type='button' className='sortButton' onClick={this.structureByInitiative}>Sort Initiative</button></div>
               </div>
-
-              <div style={{'float':'right'}}>
-                <textarea className={this.state.showHelp ? 'visible':'hidden'} readonly='true' rows='25' cols='40'>{this.state.help}</textarea>
-              </div>
-            </div>
-
-            <div style={{bottom:5, position:'absolute', width:'95%'}}>
-              <span style={{'float': 'right'}}><button type='button' onClick={this.openHelp}>{this.state.showHelp? 'Hide ':'Show '}Help</button></span>
             </div>
           </div>
         )
       }
+      /*
+            <div style={{bottom:5, position:'absolute', width:'95%'}}>
+              <span style={{'float': 'right'}}><button type='button' onClick={this.openHelp}>{this.state.showHelp? 'Hide ':'Show '}Help</button></span>
+            </div>
+      */
   }
-
+  //</HealthTracker>
   ReactDOM.render(
     <div id='background'>
       <HealthTracker />
@@ -543,12 +564,31 @@
       border-color: white;
   }
 
+  .conditions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .conditions button {
+      border-radius: 50%;
+      border: double;
+      border-color: black;
+      margin: 1px;
+      height: 15px;
+      width: 15px;
+
+  }
+
+
   .leftBox {
-    padding-right:20px;
+    padding-right:10px;
+    padding-left:10px;
     float:left;
   }
 
   .rightBox {
+    padding-right:10px;
+    padding-left:10px;
     float: left;
   }
 
